@@ -66,7 +66,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
           // Создаём элемент img с нужным источником
           const img = document.createElement('img');
-          img.src = 'shield.svg';  // Путь к картинке
+          img.src = 'icons/shield.svg';  // Путь к картинке
 
           // Если картинка должна быть отображена, добавляем её
           el.appendChild(img);  // Добавляем картинку в div
@@ -77,7 +77,7 @@ window.addEventListener('DOMContentLoaded', () => {
           el.textContent = speed;  
 
           const img = document.createElement('img');
-          img.src = 'speed.svg';  
+          img.src = 'icons/speed.svg';  
           el.appendChild(img);  // Добавляем картинку в div
       });
       if (name === "Иваныч") {
