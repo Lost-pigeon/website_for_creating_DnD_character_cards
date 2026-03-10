@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>D&D Карточки персонажей</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Стили CropperJS -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css"
+  />
+
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #e5e7eb;
+      color: #111827;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .page {
+      max-width: 1200px;
+      width: 100%;
+      padding: 24px;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 20px 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    h1 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      color: #4b5563;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 24px;
+    }
+
+    .section-title {
+      font-weight: 600;
+      margin-bottom: 12px;
+      font-size: 16px;
+    }
+
+    label {
+      font-size: 13px;
+      display: block;
+      margin-bottom: 4px;
+      color: #374151;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      background: #ffffff;
+      color: #111827;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      font-size: 13px;
+      color: #c5c9de;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 1px #4f46e5;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .btn {
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-size: 14px;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.1s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      color: #fff;
+      box-shadow: 0 10px 25px rgba(79,70,229,0.5);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 30px rgba(79,70,229,0.6);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: #e5e7eb;
+      border: 1px solid #374151;
+    }
+
+    .btn-ghost:hover {
+      background: #111827;
+    }
+
+    .buttons-row {
+      margin-top: 16px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+
+    .crop-container {
+      background: #f9fafb;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      padding: 8px;
+      margin-top: 8px;
+      max-height: 340px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    #imagePreview {
+      max-width: 100%;
+      max-height: 320px;
+      display: block;
+    }
+
+    .cards-list {
+      margin-top: 16px;
+      max-height: 320px;
+      overflow-y: auto;
+      border-top: 1px solid #e5e7eb;
+      padding-top: 8px;
+    }
+
+    .cards-list-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px dashed #e5e7eb;
+      font-size: 13px;
+    }
+
+    .cards-list-item span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 260px;
+    }
+
+    .mini-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid #9ca3af;
+      margin-left: 6px;
+      color: #6b7280;
+    }
+
+    .easter-egg {
+      margin-top: 8px;
+      font-size: 13px;
+      color: #ca8a04;
+      display: none;
+    }
+
+    .preview-wrapper {
+      margin-top: 8px;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      padding: 10px;
+      background: #f9fafb;
+    }
+
+    .card-preview {
+      width: 35mm;
+      height: 120mm;
+      position: relative;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid #111827;
+      border-radius: 0;
+      overflow: hidden;
+    }
+
+    /* Убираем внутренние отступы, чтобы фото доходило до краёв контейнера */
+    .card-half {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      padding: 0; /* <-- changed */
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 6px;
+    }
+
+    .card-half.top {
+      top: 0;
+      transform: rotate(180deg);
+      transform-origin: center;
+    }
+
+    .card-half.bottom {
+      bottom: 0;
+    }
+
+    /* Фото занимает всю доступную ширину — без зазоров */
+    .card-photo {
+      width: 100%; /* <-- full width to avoid gaps */
+      height: 66%;
+      background: none;
+      border: none;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      font-size: 10px;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .card-photo img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* Ensures the image fills the area */
+    }
+
+    .card-name {
+      width: 100%;
+      min-height: 20px;
+      border-radius: 0;
+      background: transparent;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #111827;
+      padding: 6px 8px 4px; /* чуть выше — уменьшены нижний отступ */
+      box-sizing: border-box;
+    }
+
+    .card-name.empty {
+      justify-content: flex-start;
+      padding-left: 8px;
+      color: #9ca3af;
+      border-bottom: 1px solid #111827;
+    }
+
+    .card-stats {
+      display: flex;
+      width: 100%;
+      gap: 10px;
+      margin-top: 2px;
+      padding: 0 8px 8px; /* pad stats only */
+      box-sizing: border-box;
+      justify-content: center;
+    }
+
+    /* Увеличенные стат-блоки: круг для КД и квадрат для скорости */
+:root { --stat-size: 6mm; }
+.shield {
+      flex: 0 0 auto;
+      width: var(--stat-size);
+      height: var(--stat-size);
+      border-radius: 50%;
+      border: 1px solid #000000;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: var(--stat-size);
+      font-size: calc(var(--stat-size) * 0.55);
+      color: #000000;
+    }
+
+    .rect {
+      flex: 0 0 auto;
+      width: var(--stat-size);
+      height: var(--stat-size);
+      border-radius: 0;
+      border: 1px solid #000000;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: var(--stat-size);
+      font-size: calc(var(--stat-size) * 0.55);
+      color: #000000;
+    }
+
+    .stat-empty {
+      color: #9ca3af;
+      border-style: solid;
+    }
+
+    
+    .stat-empty {
+      color: #9ca3af;
+      border-style: solid;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="card">
+      <h1>D&D карточки персонажей</h1>
+      <div class="subtitle">
+        Загрузите портрет, введите имя, КД и скорость — получите PDF с несколькими карточками на листе для печати и сгиба.
+      </div>
+
+      <div class="layout">
+        <div>
+          <div class="section-title">1. Данные персонажа</div>
+
+          <div>
+            <label for="imageInput">Фото персонажа</label>
+            <input type="file" id="imageInput" accept="image/*" />
+            <div class="hint">После выбора фото выделите область — это и будет картинка на карточке.</div>
+          </div>
+
+          <div class="crop-container">
+            <img id="imagePreview" alt="Предпросмотр" />
+          </div>
+
+          <div class="field-row">
+            <div>
+              <label for="nameInput">Имя</label>
+              <input type="text" id="nameInput" placeholder="Например, Иваныч" />
+            </div>
+            <div>
+              <label for="acInput">КД</label>
+              <input type="number" id="acInput" min="0" step="1" />
+            </div>
+            <div>
+              <label for="speedInput">Скорость</label>
+              <input type="number" id="speedInput" min="0" step="5" />
+            </div>
+          </div>
+
+          <div id="easterEgg" class="easter-egg">Золотая легендарная карта!</div>
+
+          <div class="buttons-row">
+            <button class="btn btn-primary" id="addCardBtn">Добавить карточку в лист</button>
+            <button class="btn btn-ghost" id="clearFormBtn">Сбросить форму</button>
+          </div>
+
+          <div class="hint">Если имя не заполнено — на карточке будет линия для ручного вписывания. Пустые КД и скорость оставят "щит" и квадрат пустыми.</div>
+
+          <div class="section-title" style="margin-top: 18px;">2. Карточки в текущем листе</div>
+          <div class="cards-list" id="cardsList"></div>
+        </div>
+
+        <div>
+          <div class="section-title">Превью одной карточки</div>
+          <div class="preview-wrapper">
+            <div class="card-preview" id="cardPreview">
+              <div class="card-half top">
+                <div class="card-photo" id="previewPhotoTop">
+                  Фото персонажа
+                </div>
+                <div class="card-name empty" id="previewNameTop">
+                  _______________________
+                </div>
+              <div class="card-stats">
+                  <div class="shield stat-empty" id="previewACtop"></div>
+                  <div class="rect stat-empty" id="previewSpeedTop"></div>
+              </div>
+              </div>
+              <div class="card-half bottom">
+                <div class="card-photo" id="previewPhotoBottom">
+                  Фото персонажа
+                </div>
+                <div class="card-name empty" id="previewNameBottom">
+                  _______________________
+                </div>
+                <div class="card-stats">
+                  <div class="shield stat-empty" id="previewACbottom"></div>
+                  <div class="rect stat-empty" id="previewSpeedBottom"></div>
+              </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-title" style="margin-top: 20px;">3. Экспорт</div>
+          <div class="hint">
+            Все карточки будут уложены в сетку на листе A4 в альбомной ориентации.  
+            Карточка уже содержит линию сгиба по центру; обводка идёт по краю карточки.
+          </div>
+          <div class="buttons-row">
+            <button class="btn btn-primary" id="downloadPdfBtn">
+              Скачать PDF лист
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+  <script>
+    const imageInput = document.getElementById("imageInput");
+    const imagePreview = document.getElementById("imagePreview");
+    const nameInput = document.getElementById("nameInput");
+    const acInput = document.getElementById("acInput");
+    const speedInput = document.getElementById("speedInput");
+    const addCardBtn = document.getElementById("addCardBtn");
+    const clearFormBtn = document.getElementById("clearFormBtn");
+    const cardsList = document.getElementById("cardsList");
+    const downloadPdfBtn = document.getElementById("downloadPdfBtn");
+    const easterEgg = document.getElementById("easterEgg");
+
+    const previewNameTop = document.getElementById("previewNameTop");
+    const previewNameBottom = document.getElementById("previewNameBottom");
+    const previewACtop = document.getElementById("previewACtop");
+    const previewACbottom = document.getElementById("previewACbottom");
+    const previewSpeedTop = document.getElementById("previewSpeedTop");
+    const previewSpeedBottom = document.getElementById("previewSpeedBottom");
+    const previewPhotoTop = document.getElementById("previewPhotoTop");
+    const previewPhotoBottom = document.getElementById("previewPhotoBottom");
+
+    let cropper = null;
+    let cards = [];
+
+    imageInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        imagePreview.src = reader.result;
+        if (cropper) {
+          cropper.destroy();
+        }
+        cropper = new Cropper(imagePreview, {
+          aspectRatio: 35 / 40, // 35mm x 40mm aspect ratio
+          viewMode: 1,
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function updatePreviewText() {
+      const name = nameInput.value.trim();
+      const ac = acInput.value.trim();
+      const speed = speedInput.value.trim();
+
+      const hasName = name.length > 0;
+      const hasAC = ac.length > 0;
+      const hasSpeed = speed.length > 0;
+
+      [previewNameTop, previewNameBottom].forEach((el) => {
+        if (hasName) {
+          el.textContent = name;
+          el.classList.remove("empty");
+        } else {
+          el.textContent = "_______________________";
+          el.classList.add("empty");
+        }
+      });
+
+      [previewACtop, previewACbottom].forEach((el) => {
+        if (hasAC) {
+          el.textContent = ac;
+          el.classList.remove("stat-empty");
+        } else {
+          el.textContent = "";
+          el.classList.add("stat-empty");
+        }
+      });
+
+      [previewSpeedTop, previewSpeedBottom].forEach((el) => {
+        if (hasSpeed) {
+          el.textContent = speed;
+          el.classList.remove("stat-empty");
+        } else {
+          el.textContent = "";
+          el.classList.add("stat-empty");
+        }
+      });
+
+      if (name === "Иваныч") {
+        easterEgg.style.display = "block";
+      } else {
+        easterEgg.style.display = "none";
+      }
+    }
+
+    nameInput.addEventListener("input", updatePreviewText);
+    acInput.addEventListener("input", updatePreviewText);
+    speedInput.addEventListener("input", updatePreviewText);
+
+    function setPreviewPhotoFromDataUrl(dataUrl) {
+      [previewPhotoTop, previewPhotoBottom].forEach((container) => {
+        container.innerHTML = "";
+        const img = document.createElement("img");
+        img.src = dataUrl;
+        container.appendChild(img);
+      });
+    }
+
+addCardBtn.addEventListener("click", async () => {
+  const name = nameInput.value.trim();
+  const ac = acInput.value.trim();
+  const speed = speedInput.value.trim();
+
+  let photoDataUrl = null;
+  if (cropper) {
+    // Получаем обрезанное изображение с параметрами ширины и высоты
+    const canvas = cropper.getCroppedCanvas({
+      width: 350,
+      height: 400
+    });
+    photoDataUrl = canvas.toDataURL("image/png");  // Преобразуем в base64 строку
+  }
+
+  if (photoDataUrl) {
+    setPreviewPhotoFromDataUrl(photoDataUrl);  // Отображаем на карточке
+  }
+
+  updatePreviewText();  // Обновляем текст на карточке
+
+  // Добавляем карточку в список
+  cards.push({
+    name,
+    ac,
+    speed,
+    photoDataUrl,
+  });
+
+  renderCardsList();  // Перерисовываем список карточек
+});
+
+    function renderCardsList() {
+      cardsList.innerHTML = "";
+      if (!cards.length) {
+        cardsList.innerHTML = '<span style="font-size:12px;color:#6b7280;">Пока нет карточек в листе.</span>';
+        return;
+      }
+      cards.forEach((card, index) => {
+        const row = document.createElement("div");
+        row.className = "cards-list-item";
+        const label = document.createElement("span");
+        label.textContent = (card.name || "Без имени") + " | КД " + (card.ac || "—") + " | Скорость " + (card.speed || "—");
+        if (!card.name || !card.ac || !card.speed) {
+          const badge = document.createElement("span");
+          badge.className = "mini-badge";
+          badge.textContent = "есть пустые поля";
+          label.appendChild(badge);
+        }
+        const removeBtn = document.createElement("button");
+        removeBtn.className = "btn btn-ghost";
+        removeBtn.style.padding = "4px 10px";
+        removeBtn.style.fontSize = "11px";
+        removeBtn.textContent = "Удалить";
+        removeBtn.addEventListener("click", () => {
+          cards.splice(index, 1);
+          renderCardsList();
+        });
+
+        row.appendChild(label);
+        row.appendChild(removeBtn);
+        cardsList.appendChild(row);
+      });
+    }
+
+    clearFormBtn.addEventListener("click", () => {
+      nameInput.value = "";
+      acInput.value = "";
+      speedInput.value = "";
+      updatePreviewText();
+      if (cropper) {
+        cropper.clear();
+      }
+    });
+
+    downloadPdfBtn.addEventListener("click", async () => {
+      if (!cards.length) {
+        alert("Добавьте хотя бы одну карточку в лист.");
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+
+      // Физический размер одной карточки: 35 мм ширина, 120 мм длина
+      const cardWidth = 35;
+      const cardHeight = 120;
+
+      const cols = Math.max(1, Math.floor(pageWidth / cardWidth));
+      const rows = Math.max(1, Math.floor(pageHeight / cardHeight));
+
+      let currentX = 2;
+      let currentY = 2;
+      let colIndex = 0;
+      let rowIndex = 0;
+
+      async function renderCardToDataUrl(card) {
+        const temp = document.createElement("div");
+        temp.style.position = "fixed";
+        temp.style.left = "-10000px";
+        temp.style.top = "0";
+        // Превью пропорционально карточке 35x120 мм — те же размеры, что в .card-preview
+        temp.style.width = "35mm";
+        temp.style.height = "120mm";
+        temp.style.padding = "0"; /* <-- no inner padding so photo touches edges */
+        temp.style.background = "#ffffff";
+        temp.style.border = "1px solid #000000";
+        temp.style.borderRadius = "0";
+        temp.style.overflow = "hidden";
+        temp.style.boxSizing = "border-box";
+
+        temp.innerHTML = `
+          <div style="position:relative;width:100%;height:100%;font-family:system-ui, sans-serif;color:#000000;font-size:14px;background:#ffffff;">
+            <style>
+              :root{
+                --stat-size: 7mm;
+                --stats-gap: 40px;
+                --name-padding-top: 2px;
+                --name-padding-right: 6px;
+                --name-padding-bottom: 1px;
+                --name-padding-left: 6px;
+              }
+              .card-photo { width:100%; height:39.6mm; }
+              .name-container { padding: var(--name-padding-top) var(--name-padding-right) var(--name-padding-bottom) var(--name-padding-left); box-sizing: border-box; }
+              .stats-row { display:flex; gap: var(--stats-gap); justify-content:center; }
+              .stat { width:var(--stat-size); height:var(--stat-size); display:flex; align-items:center; justify-content:center; line-height:var(--stat-size); font-size:calc(var(--stat-size) * 0.55); border:1px solid #000; background:#fff; }
+              .stat.circle { border-radius:50%; }
+              .stat.square { border-radius:0; }
+            </style>
+
+            <div style="position:absolute;left:0;top:60mm;width:100%;height:0;border-top:1px dashed rgba(0,0,0,0.3);"></div>
+
+            <div style="position:absolute;left:0;top:0;width:100%;height:60mm;padding:0;box-sizing:border-box;display:flex;flex-direction:column;align-items:stretch;gap:10px;transform:rotate(180deg);transform-origin:center;">
+              <div style="width:100%;height:39.6mm;border-radius:0;border:1px solid #000000;overflow:hidden;background:#ffffff;display:flex;align-items:stretch;justify-content:center;">
+                ${card.photoDataUrl ? `<img src="${card.photoDataUrl}" style="width:100%;height:100%;object-fit:cover;display:block;" />` : "Фото персонажа"}
+              </div>
+              <div class="name-container" style="width:100%;min-height:20px;display:flex;flex-direction:column;justify-content:flex-end;color:#111827;">
+                <div style="width:100%;min-height:14px;display:flex;align-items:center;justify-content:${card.name ? "center" : "flex-start"};border-bottom:${card.name ? "none" : "1px solid #000000"};">
+                  ${card.name || ""}
+                </div>
+                <div class="stats-row" style="margin-top:4px;">
+                  <div class="stat circle" style="color:${card.ac ? "#000000" : "#9ca3af"};">${card.ac || ""}</div>
+                  <div class="stat square" style="color:${card.speed ? "#000000" : "#9ca3af"};">${card.speed || ""}</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="position:absolute;left:0;bottom:0;width:100%;height:60mm;padding:0;box-sizing:border-box;display:flex;flex-direction:column;align-items:stretch;gap:10px;">
+              <div style="width:100%;height:39.6mm;border-radius:0;border:1px solid #000000;overflow:hidden;background:#ffffff;display:flex;align-items:stretch;justify-content:center;">
+                ${card.photoDataUrl ? `<img src="${card.photoDataUrl}" style="width:100%;height:100%;object-fit:cover;display:block;" />` : "Фото персонажа"}
+              </div>
+              <div class="name-container" style="width:100%;min-height:20px;display:flex;flex-direction:column;justify-content:flex-end;color:#111827;">
+                <div style="width:100%;min-height:14px;display:flex;align-items:center;justify-content:${card.name ? "center" : "flex-start"};border-bottom:${card.name ? "none" : "1px solid #000000"};">
+                  ${card.name || ""}
+                </div>
+                <div class="stats-row" style="margin-top:4px;">
+                  <div class="stat circle" style="color:${card.ac ? "#000000" : "#9ca3af"};">${card.ac || ""}</div>
+                  <div class="stat square" style="color:${card.speed ? "#000000" : "#9ca3af"};">${card.speed || ""}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(temp);
+        const canvas = await html2canvas(temp, { backgroundColor: "#ffffff", scale: 2 });
+        document.body.removeChild(temp);
+        return canvas.toDataURL("image/png");
+      }
+
+      for (let i = 0; i < cards.length; i++) {
+        if (i !== 0 && i % (cols * rows) === 0) {
+          doc.addPage();
+          currentX = 2;
+          currentY = 2;
+          colIndex = 0;
+          rowIndex = 0;
+        }
+
+        const card = cards[i];
+        const imgData = await renderCardToDataUrl(card);
+
+        doc.addImage(imgData, "PNG", currentX, currentY, cardWidth, cardHeight);
+
+        colIndex++;
+        if (colIndex >= cols) {
+          colIndex = 0;
+          rowIndex++;
+          currentX = 2;
+          currentY += cardHeight + 4;
+        } else {
+          currentX += cardWidth + 4;
+        }
+      }
+
+      doc.save("dnd_cards.pdf");
+    });
+
+    updatePreviewText();
+    renderCardsList();
+  </script>
+</body>
+</html>
