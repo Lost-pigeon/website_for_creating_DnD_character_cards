@@ -339,7 +339,7 @@ window.addEventListener("DOMContentLoaded", () => {
         ${
           hasValue
             ? `<span>${escapeHtml(value)}</span>${iconSrc}`
-            : ""
+            : `<span>${escapeHtml()}</span>${iconSrc}`
         }
       </div>
     `;
