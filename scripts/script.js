@@ -1,316 +1,418 @@
-window.addEventListener('DOMContentLoaded', () => {
-  const imageInput = document.getElementById("imageInput");
-    const imagePreview = document.getElementById("imagePreview");
-    const nameInput = document.getElementById("nameInput");
-    const acInput = document.getElementById("acInput");
-    const speedInput = document.getElementById("speedInput");
-    const addCardBtn = document.getElementById("addCardBtn");
-    const clearFormBtn = document.getElementById("clearFormBtn");
-    const cardsList = document.getElementById("cardsList");
-    const downloadPdfBtn = document.getElementById("downloadPdfBtn");
-    const easterEgg = document.getElementById("easterEgg");
+window.addEventListener("DOMContentLoaded", () => {
+  const DOM = {
+    imageInput: document.getElementById("imageInput"),
+    imagePreview: document.getElementById("imagePreview"),
+    nameInput: document.getElementById("nameInput"),
+    acInput: document.getElementById("acInput"),
+    speedInput: document.getElementById("speedInput"),
+    addCardBtn: document.getElementById("addCardBtn"),
+    clearFormBtn: document.getElementById("clearFormBtn"),
+    cardsList: document.getElementById("cardsList"),
+    downloadPdfBtn: document.getElementById("downloadPdfBtn"),
+    easterEgg: document.getElementById("easterEgg"),
 
-    const previewNameTop = document.getElementById("previewNameTop");
-    const previewNameBottom = document.getElementById("previewNameBottom");
-    const previewACtop = document.getElementById("previewACtop");
-    const previewACbottom = document.getElementById("previewACbottom");
-    const previewSpeedTop = document.getElementById("previewSpeedTop");
-    const previewSpeedBottom = document.getElementById("previewSpeedBottom");
-    const previewPhotoTop = document.getElementById("previewPhotoTop");
-    const previewPhotoBottom = document.getElementById("previewPhotoBottom");
+    previewName: [
+      document.getElementById("previewNameTop"),
+      document.getElementById("previewNameBottom"),
+    ],
+    previewAC: [
+      document.getElementById("previewACtop"),
+      document.getElementById("previewACbottom"),
+    ],
+    previewSpeed: [
+      document.getElementById("previewSpeedTop"),
+      document.getElementById("previewSpeedBottom"),
+    ],
+    previewPhoto: [
+      document.getElementById("previewPhotoTop"),
+      document.getElementById("previewPhotoBottom"),
+    ],
+  };
 
-    let cropper = null;
-    let cards = [];
+  const CONFIG = {
+    cropAspectRatio: 35 / 40,
+    croppedImageWidth: 350,
+    croppedImageHeight: 400,
+    pdfFileName: "dnd_cards.pdf",
+    pdf: {
+      orientation: "landscape",
+      unit: "mm",
+      format: "a4",
+      cardWidth: 35,
+      cardHeight: 120,
+      cardsPerPage: 7,
+      startX: 2,
+      startY: 2,
+      gapX: 4,
+      gapY: 4,
+      cols: 7,
+    },
+    placeholders: {
+      name: "_______________________",
+      photo: "Фото персонажа",
+      emptyList: "Пока нет карточек в листе.",
+    },
+    icons: {
+      ac: "icons/shield.svg",
+      speed: "icons/speed.svg",
+    },
+    easterEggName: "Иваныч",
+  };
 
-    imageInput.addEventListener("change", (e) => {
-      let photoDataUrl = null;
-      setPreviewPhotoFromDataUrl("");  // Сбрасываем превью при загрузке нового изображения
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        imagePreview.src = reader.result;
-        if (cropper) {
-          cropper.destroy();
-        }
-        cropper = new Cropper(imagePreview, {
-          aspectRatio: 35 / 40, // 35mm x 40mm aspect ratio
-          viewMode: 1,
-        });
-      };
-      reader.readAsDataURL(file);
-    });
+  let cropper = null;
+  let cards = [];
 
-    function updatePreviewText() {
-      const name = nameInput.value.trim();
-      const ac = acInput.value.trim();
-      const speed = speedInput.value.trim();
-      const hasName = name.length > 0;
-      const hasAC = ac.length > 0;
-      const hasSpeed = speed.length > 0;
+  init();
 
-      [previewNameTop, previewNameBottom].forEach((el) => {
-        if (hasName) {
-          el.textContent = name;
-          el.classList.remove("empty");
-        } else {
-          el.textContent = "_______________________";
-          el.classList.add("empty");
-        }
-      });
-
-      [previewACtop, previewACbottom].forEach((el) => {
-          // Убираем класс для пустого состояния
-          el.classList.remove('stat-empty');
-          el.textContent = ac;  
-
-          // Создаём элемент img с нужным источником
-          const img = document.createElement('img');
-          img.src = 'icons/shield.svg';  // Путь к картинке
-
-          // Если картинка должна быть отображена, добавляем её
-          el.appendChild(img);  // Добавляем картинку в div
-      });
-      [previewSpeedTop, previewSpeedBottom].forEach((el) => {
-          // Убираем класс для пустого состояния
-          el.classList.remove('stat-empty');
-          el.textContent = speed;  
-
-          const img = document.createElement('img');
-          img.src = 'icons/speed.svg';  
-          el.appendChild(img);  // Добавляем картинку в div
-      });
-      if (name === "Иваныч") {
-        easterEgg.style.display = "block";
-      } else {
-        easterEgg.style.display = "none";
-      }
-    }
-
-    nameInput.addEventListener("input", updatePreviewText);
-    acInput.addEventListener("input", updatePreviewText);
-    speedInput.addEventListener("input", updatePreviewText);
-
-    function setPreviewPhotoFromDataUrl(dataUrl) {
-      [previewPhotoTop, previewPhotoBottom].forEach((container) => {
-        if (!dataUrl) {
-          container.innerHTML = "Фото персонажа";
-          return;
-        }
-        container.innerHTML = "";
-        const img = document.createElement("img");
-        img.src = dataUrl;
-        container.appendChild(img);
-      });
-    }
-
-addCardBtn.addEventListener("click", async () => {
-  const name = nameInput.value.trim();
-  const ac = acInput.value.trim();
-  const speed = speedInput.value.trim();
-
-  let photoDataUrl = null;
-  if (cropper) {
-    // Получаем обрезанное изображение с параметрами ширины и высоты
-    const canvas = cropper.getCroppedCanvas({
-      width: 350,
-      height: 400
-    });
-    photoDataUrl = canvas.toDataURL("image/png");  // Преобразуем в base64 строку
-  }
-
-  if (photoDataUrl) {
-    setPreviewPhotoFromDataUrl(photoDataUrl);  // Отображаем на карточке
-  }
-
-  updatePreviewText();  // Обновляем текст на карточке
-
-  // Добавляем карточку в список
-  cards.push({
-    name,
-    ac,
-    speed,
-    photoDataUrl,
-  });
-
-  renderCardsList();  // Перерисовываем список карточек
-});
-
-    function renderCardsList() {
-      cardsList.innerHTML = "";
-      if (!cards.length) {
-        cardsList.innerHTML = '<span style="font-size:12px;color:#6b7280;">Пока нет карточек в листе.</span>';
-        return;
-      }
-      cards.forEach((card, index) => {
-        const row = document.createElement("div");
-        row.className = "cards-list-item";
-        const label = document.createElement("span");
-        label.textContent = (card.name || "Без имени") + " | КД " + (card.ac || "—") + " | Скорость " + (card.speed || "—");
-        if (!card.name || !card.ac || !card.speed) {
-          const badge = document.createElement("span");
-          badge.className = "mini-badge";
-          badge.textContent = "есть пустые поля";
-          label.appendChild(badge);
-        }
-        const removeBtn = document.createElement("button");
-        removeBtn.className = "btn btn-ghost";
-        removeBtn.style.padding = "4px 10px";
-        removeBtn.style.fontSize = "11px";
-        removeBtn.textContent = "Удалить";
-        removeBtn.addEventListener("click", () => {
-          cards.splice(index, 1);
-          renderCardsList();
-        });
-
-        row.appendChild(label);
-        row.appendChild(removeBtn);
-        cardsList.appendChild(row);
-      });
-    }
-
-    clearFormBtn.addEventListener("click", () => {
-      nameInput.value = "";
-      acInput.value = "";
-      speedInput.value = "";
-      updatePreviewText();
-      if (cropper) {
-        cropper.clear();
-      }
-    });
-
-    downloadPdfBtn.addEventListener("click", async () => {
-      if (!cards.length) {
-        alert("Добавьте хотя бы одну карточку в лист.");
-        return;
-      }
-
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({
-        orientation: "landscape",
-        unit: "mm",
-        format: "a4",
-      });
-
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
-
-      // Физический размер одной карточки: 35 мм ширина, 120 мм длина
-      const cardWidth = 35;
-      const cardHeight = 120;
-
-      const maxCardsPerPage = 7;
-
-      // 7 карточек в ряд
-      const cols = 7;
-      const rows = 1;
-      
-      let currentX = 2;
-      let currentY = 2;
-      let colIndex = 0;
-      let rowIndex = 0;
-
-      async function renderCardToDataUrl(card) {
-        const temp = document.createElement("div");
-        temp.style.position = "fixed";
-        temp.style.left = "-10000px";
-        temp.style.top = "0";
-        // Превью пропорционально карточке 35x120 мм — те же размеры, что в .card-preview
-        temp.style.width = "35mm";
-        temp.style.height = "120mm";
-        temp.style.padding = "0"; /* <-- no inner padding so photo touches edges */
-        temp.style.background = "#ffffff";
-        temp.style.border = "1px solid #000000";
-        temp.style.borderRadius = "0";
-        temp.style.overflow = "hidden";
-        temp.style.boxSizing = "border-box";
-
-        temp.innerHTML = `
-          <div style="position:relative;width:100%;height:100%;font-family:system-ui, sans-serif;color:#000000;font-size:14px;background:#ffffff;">
-            <style>
-              :root{
-                --stat-size: 7mm;
-                --stats-gap: 40px;
-                --name-padding-top: 2px;
-                --name-padding-right: 6px;
-                --name-padding-bottom: 1px;
-                --name-padding-left: 6px;
-              }
-              .card-photo { width:100%; height:39.6mm; }
-              .name-container { padding: var(--name-padding-top) var(--name-padding-right) var(--name-padding-bottom) var(--name-padding-left); box-sizing: border-box; }
-              .stats-row { display:flex; gap: var(--stats-gap); justify-content:center; }
-              .stat { width:var(--stat-size); height:var(--stat-size); display:flex; align-items:center; justify-content:center; line-height:var(--stat-size); font-size:calc(var(--stat-size) * 0.55); border:1px solid #000; background:#fff; }
-              .stat.circle { border-radius:50%; }
-              .stat.square { border-radius:0; }
-            </style>
-
-            <div style="position:absolute;left:0;top:60mm;width:100%;height:0;border-top:1px dashed rgba(0,0,0,0.3);"></div>
-
-            <div style="position:absolute;left:0;top:0;width:100%;height:60mm;padding:0;box-sizing:border-box;display:flex;flex-direction:column;align-items:stretch;gap:10px;transform:rotate(180deg);transform-origin:center;">
-              <div style="width:100%;height:39.6mm;border-radius:0;border:1px solid #000000;overflow:hidden;background:#ffffff;display:flex;align-items:stretch;justify-content:center;">
-                ${card.photoDataUrl ? `<img src="${card.photoDataUrl}" style="width:100%;height:100%;object-fit:cover;display:block;" />` : "Фото персонажа"}
-              </div>
-              <div class="name-container" style="width:100%;min-height:20px;display:flex;flex-direction:column;justify-content:flex-end;color:#111827;">
-                <div style="width:100%;min-height:14px;display:flex;align-items:center;justify-content:${card.name ? "center" : "flex-start"};border-bottom:${card.name ? "none" : "1px solid #000000"};">
-                  ${card.name || ""}
-                </div>
-                <div class="stats-row" style="margin-top:4px;">
-                  <div class="stat circle" style="color:${card.ac ? "#000000" : "#9ca3af"};">${card.ac || ""}</div>
-                  <div class="stat square" style="color:${card.speed ? "#000000" : "#9ca3af"};">${card.speed || ""}</div>
-                </div>
-              </div>
-            </div>
-
-            <div style="position:absolute;left:0;bottom:0;width:100%;height:60mm;padding:0;box-sizing:border-box;display:flex;flex-direction:column;align-items:stretch;gap:10px;">
-              <div style="width:100%;height:39.6mm;border-radius:0;border:1px solid #000000;overflow:hidden;background:#ffffff;display:flex;align-items:stretch;justify-content:center;">
-                ${card.photoDataUrl ? `<img src="${card.photoDataUrl}" style="width:100%;height:100%;object-fit:cover;display:block;" />` : "Фото персонажа"}
-              </div>
-              <div class="name-container" style="width:100%;min-height:20px;display:flex;flex-direction:column;justify-content:flex-end;color:#111827;">
-                <div style="width:100%;min-height:14px;display:flex;align-items:center;justify-content:${card.name ? "center" : "flex-start"};border-bottom:${card.name ? "none" : "1px solid #000000"};">
-                  ${card.name || ""}
-                </div>
-                <div class="stats-row" style="margin-top:4px;">
-                  <div class="stat circle" style="color:${card.ac ? "#000000" : "#9ca3af"};">${card.ac || ""}</div>
-                  <div class="stat square" style="color:${card.speed ? "#000000" : "#9ca3af"};">${card.speed || ""}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-        document.body.appendChild(temp);
-        const canvas = await html2canvas(temp, { backgroundColor: "#ffffff", scale: 2 });
-        document.body.removeChild(temp);
-        return canvas.toDataURL("image/png");
-      }
-
-      for (let i = 0; i < cards.length; i++) {
-        if (i !== 0 && i % maxCardsPerPage === 0) {
-          doc.addPage();
-          currentX = 2;
-          currentY = 2;
-          colIndex = 0;
-          rowIndex = 0;
-        }
-
-        const card = cards[i];
-        const imgData = await renderCardToDataUrl(card);
-
-        doc.addImage(imgData, "PNG", currentX, currentY, cardWidth, cardHeight);
-
-        colIndex++;
-        if (colIndex >= cols) {
-          colIndex = 0;
-          rowIndex++;
-          currentX = 2;
-          currentY += cardHeight + 4;
-        } else {
-          currentX += cardWidth + 4;
-        }
-      }
-
-      doc.save("dnd_cards.pdf");
-    });
-
-    updatePreviewText();
+  function init() {
+    bindEvents();
+    updatePreview();
     renderCardsList();
+  }
+
+  function bindEvents() {
+    DOM.imageInput.addEventListener("change", handleImageChange);
+    DOM.nameInput.addEventListener("input", updatePreview);
+    DOM.acInput.addEventListener("input", updatePreview);
+    DOM.speedInput.addEventListener("input", updatePreview);
+    DOM.addCardBtn.addEventListener("click", handleAddCard);
+    DOM.clearFormBtn.addEventListener("click", handleClearForm);
+    DOM.downloadPdfBtn.addEventListener("click", handleDownloadPdf);
+  }
+
+  function getFormData() {
+    return {
+      name: DOM.nameInput.value.trim(),
+      ac: DOM.acInput.value.trim(),
+      speed: DOM.speedInput.value.trim(),
+    };
+  }
+
+  function handleImageChange(event) {
+    setPreviewPhoto("");
+
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      DOM.imagePreview.src = reader.result;
+
+      if (cropper) {
+        cropper.destroy();
+      }
+
+      cropper = new Cropper(DOM.imagePreview, {
+        aspectRatio: CONFIG.cropAspectRatio,
+        viewMode: 1,
+      });
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  function updatePreview() {
+    const { name, ac, speed } = getFormData();
+
+    renderNamePreview(name);
+    renderStatPreview(DOM.previewAC, ac, CONFIG.icons.ac);
+    renderStatPreview(DOM.previewSpeed, speed, CONFIG.icons.speed);
+    toggleEasterEgg(name);
+  }
+
+  function renderNamePreview(name) {
+    const hasName = Boolean(name);
+
+    DOM.previewName.forEach((el) => {
+      el.textContent = hasName ? name : CONFIG.placeholders.name;
+      el.classList.toggle("empty", !hasName);
+    });
+  }
+
+  function renderStatPreview(elements, value, iconSrc) {
+    elements.forEach((el) => {
+      el.innerHTML = "";
+      el.classList.remove("stat-empty");
+
+      if (!value) {
+        el.classList.add("stat-empty");
+        return;
+      }
+
+      el.append(document.createTextNode(value));
+
+      const img = document.createElement("img");
+      img.src = iconSrc;
+      img.alt = "";
+      el.appendChild(img);
+    });
+  }
+
+  function toggleEasterEgg(name) {
+    DOM.easterEgg.style.display =
+      name === CONFIG.easterEggName ? "block" : "none";
+  }
+
+  function setPreviewPhoto(dataUrl) {
+    DOM.previewPhoto.forEach((container) => {
+      container.innerHTML = "";
+
+      if (!dataUrl) {
+        container.textContent = CONFIG.placeholders.photo;
+        return;
+      }
+
+      const img = document.createElement("img");
+      img.src = dataUrl;
+      img.alt = "Фото персонажа";
+      container.appendChild(img);
+    });
+  }
+
+  function getCroppedPhotoDataUrl() {
+    if (!cropper) return null;
+
+    const canvas = cropper.getCroppedCanvas({
+      width: CONFIG.croppedImageWidth,
+      height: CONFIG.croppedImageHeight,
+    });
+
+    return canvas.toDataURL("image/png");
+  }
+
+  function handleAddCard() {
+    const { name, ac, speed } = getFormData();
+    const photoDataUrl = getCroppedPhotoDataUrl();
+
+    if (photoDataUrl) {
+      setPreviewPhoto(photoDataUrl);
+    }
+
+    updatePreview();
+
+    cards.push({
+      name,
+      ac,
+      speed,
+      photoDataUrl,
+    });
+
+    renderCardsList();
+  }
+
+  function renderCardsList() {
+    DOM.cardsList.innerHTML = "";
+
+    if (!cards.length) {
+      DOM.cardsList.innerHTML = `
+        <span style="font-size:12px;color:#6b7280;">
+          ${CONFIG.placeholders.emptyList}
+        </span>
+      `;
+      return;
+    }
+
+    cards.forEach((card, index) => {
+      const row = document.createElement("div");
+      row.className = "cards-list-item";
+
+      const label = document.createElement("span");
+      label.textContent = formatCardLabel(card);
+
+      if (hasEmptyFields(card)) {
+        const badge = document.createElement("span");
+        badge.className = "mini-badge";
+        badge.textContent = "есть пустые поля";
+        label.appendChild(badge);
+      }
+
+      const removeBtn = document.createElement("button");
+      removeBtn.className = "btn btn-ghost";
+      removeBtn.style.padding = "4px 10px";
+      removeBtn.style.fontSize = "11px";
+      removeBtn.textContent = "Удалить";
+      removeBtn.addEventListener("click", () => removeCard(index));
+
+      row.append(label, removeBtn);
+      DOM.cardsList.appendChild(row);
+    });
+  }
+
+  function formatCardLabel(card) {
+    return `${card.name || "Без имени"} | КД ${card.ac || "—"} | Скорость ${
+      card.speed || "—"
+    }`;
+  }
+
+  function hasEmptyFields(card) {
+    return !card.name || !card.ac || !card.speed;
+  }
+
+  function removeCard(index) {
+    cards.splice(index, 1);
+    renderCardsList();
+  }
+
+  function handleClearForm() {
+    DOM.nameInput.value = "";
+    DOM.acInput.value = "";
+    DOM.speedInput.value = "";
+
+    updatePreview();
+
+    if (cropper) {
+      cropper.clear();
+    }
+  }
+
+  async function handleDownloadPdf() {
+    if (!cards.length) {
+      alert("Добавьте хотя бы одну карточку в лист.");
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({
+      orientation: CONFIG.pdf.orientation,
+      unit: CONFIG.pdf.unit,
+      format: CONFIG.pdf.format,
+    });
+
+    let currentX = CONFIG.pdf.startX;
+    let currentY = CONFIG.pdf.startY;
+
+    for (let i = 0; i < cards.length; i++) {
+      if (i > 0 && i % CONFIG.pdf.cardsPerPage === 0) {
+        doc.addPage();
+        currentX = CONFIG.pdf.startX;
+        currentY = CONFIG.pdf.startY;
+      }
+
+      const imgData = await renderCardToDataUrl(cards[i]);
+
+      doc.addImage(
+        imgData,
+        "PNG",
+        currentX,
+        currentY,
+        CONFIG.pdf.cardWidth,
+        CONFIG.pdf.cardHeight
+      );
+
+      const isLastColumn = (i + 1) % CONFIG.pdf.cols === 0;
+
+      if (isLastColumn) {
+        currentX = CONFIG.pdf.startX;
+        currentY += CONFIG.pdf.cardHeight + CONFIG.pdf.gapY;
+      } else {
+        currentX += CONFIG.pdf.cardWidth + CONFIG.pdf.gapX;
+      }
+    }
+
+    doc.save(CONFIG.pdfFileName);
+  }
+
+  async function renderCardToDataUrl(card) {
+    const temp = document.createElement("div");
+
+    temp.style.position = "fixed";
+    temp.style.left = "-10000px";
+    temp.style.top = "0";
+    temp.style.width = "35mm";
+    temp.style.height = "120mm";
+    temp.style.padding = "0";
+    temp.style.background = "#ffffff";
+    temp.style.border = "1px solid #000000";
+    temp.style.borderRadius = "0";
+    temp.style.overflow = "hidden";
+    temp.style.boxSizing = "border-box";
+
+    temp.innerHTML = buildPdfCardMarkup(card);
+
+    document.body.appendChild(temp);
+
+    const canvas = await html2canvas(temp, {
+      backgroundColor: "#ffffff",
+      scale: 2,
+    });
+
+    document.body.removeChild(temp);
+
+    return canvas.toDataURL("image/png");
+  }
+
+  function buildPdfCardMarkup(card) {
+    const photoMarkup = card.photoDataUrl
+      ? `<img src="${card.photoDataUrl}" style="width:100%;height:100%;object-fit:cover;display:block;" />`
+      : CONFIG.placeholders.photo;
+
+    const nameJustify = card.name ? "center" : "flex-start";
+    const nameBorder = card.name ? "none" : "1px solid #000000";
+    const acColor = card.ac ? "#000000" : "#9ca3af";
+    const speedColor = card.speed ? "#000000" : "#9ca3af";
+
+    const halfMarkup = `
+      <div style="width:100%;height:39.6mm;border-radius:0;border:1px solid #000000;overflow:hidden;background:#ffffff;display:flex;align-items:stretch;justify-content:center;">
+        ${photoMarkup}
+      </div>
+      <div class="name-container" style="width:100%;min-height:20px;display:flex;flex-direction:column;justify-content:flex-end;color:#111827;">
+        <div style="width:100%;min-height:14px;display:flex;align-items:center;justify-content:${nameJustify};border-bottom:${nameBorder};">
+          ${card.name || ""}
+        </div>
+        <div class="stats-row" style="margin-top:4px;">
+          <div class="stat circle" style="color:${acColor};">${card.ac || ""}</div>
+          <div class="stat square" style="color:${speedColor};">${card.speed || ""}</div>
+        </div>
+      </div>
+    `;
+
+    return `
+      <div style="position:relative;width:100%;height:100%;font-family:system-ui, sans-serif;color:#000000;font-size:14px;background:#ffffff;">
+        <style>
+          :root{
+            --stat-size: 7mm;
+            --stats-gap: 40px;
+            --name-padding-top: 2px;
+            --name-padding-right: 6px;
+            --name-padding-bottom: 1px;
+            --name-padding-left: 6px;
+          }
+          .card-photo { width:100%; height:39.6mm; }
+          .name-container {
+            padding: var(--name-padding-top) var(--name-padding-right) var(--name-padding-bottom) var(--name-padding-left);
+            box-sizing: border-box;
+          }
+          .stats-row {
+            display:flex;
+            gap: var(--stats-gap);
+            justify-content:center;
+          }
+          .stat {
+            width:var(--stat-size);
+            height:var(--stat-size);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            line-height:var(--stat-size);
+            font-size:calc(var(--stat-size) * 0.55);
+            border:1px solid #000;
+            background:#fff;
+          }
+          .stat.circle { border-radius:50%; }
+          .stat.square { border-radius:0; }
+        </style>
+
+        <div style="position:absolute;left:0;top:60mm;width:100%;height:0;border-top:1px dashed rgba(0,0,0,0.3);"></div>
+
+        <div style="position:absolute;left:0;top:0;width:100%;height:60mm;padding:0;box-sizing:border-box;display:flex;flex-direction:column;align-items:stretch;gap:10px;transform:rotate(180deg);transform-origin:center;">
+          ${halfMarkup}
+        </div>
+
+        <div style="position:absolute;left:0;bottom:0;width:100%;height:60mm;padding:0;box-sizing:border-box;display:flex;flex-direction:column;align-items:stretch;gap:10px;">
+          ${halfMarkup}
+        </div>
+      </div>
+    `;
+  }
 });
