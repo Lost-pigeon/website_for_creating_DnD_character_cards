@@ -32,7 +32,7 @@ window.addEventListener("DOMContentLoaded", () => {
       cols: 7,
     },
     placeholders: {
-      name: "_______________________",
+      name: "____________________",
       photo: "Фото персонажа",
       emptyList: "Пока нет карточек в листе.",
     },
