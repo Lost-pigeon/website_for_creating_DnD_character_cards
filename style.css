@@ -212,6 +212,20 @@
       overflow: hidden;
     }
 
+    .card-preview-export {
+      margin: 0;
+    }
+
+    .card-cut-line {
+      position: absolute;
+      left: 0;
+      top: 60mm;
+      width: 100%;
+      border-top: 1px dashed rgba(0, 0, 0, 0.3);
+      z-index: 1;
+      pointer-events: none;
+    }
+
     /* Убираем внутренние отступы, чтобы фото доходило до краёв контейнера */
     .card-half {
       position: absolute;
@@ -256,6 +270,17 @@
       width: 100%;
       height: 100%;
       object-fit: cover; /* Ensures the image fills the area */
+    }
+
+    .card-photo-placeholder {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      box-sizing: border-box;
+      color: #6b7280;
     }
 
     .card-name {
@@ -307,11 +332,15 @@
       position: relative;  /* Чтобы элементы (текст и картинка) не перекрывали друг друга */
     }
 
-    .shield img {
+    .shield img,
+    .shield svg {
       max-width: 100%;    
       max-height: 100%;
       object-fit: contain;
       position: absolute; 
+      inset: 0;
+      width: 100%;
+      height: 100%;
     }
 
     .shield span {
@@ -329,16 +358,20 @@
       font-weight: 600;
       width: var(--stat-size);
       height: var(--stat-size);
-      border-radius: 50%;
+      border-radius: 0;
       background: #ffffff;
       color: #000000; 
       position: relative;  /* Чтобы элементы (текст и картинка) не перекрывали друг друга */
     }
-    .speed img {
+    .speed img,
+    .speed svg {
       max-width: 100%;    
       max-height: 100%;
       object-fit: contain;
       position: absolute; 
+      inset: 0;
+      width: 100%;
+      height: 100%;
     }
 
     .speed span {

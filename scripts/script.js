@@ -10,23 +10,7 @@ window.addEventListener("DOMContentLoaded", () => {
     cardsList: document.getElementById("cardsList"),
     downloadPdfBtn: document.getElementById("downloadPdfBtn"),
     easterEgg: document.getElementById("easterEgg"),
-
-    previewName: [
-      document.getElementById("previewNameTop"),
-      document.getElementById("previewNameBottom"),
-    ],
-    previewAC: [
-      document.getElementById("previewACtop"),
-      document.getElementById("previewACbottom"),
-    ],
-    previewSpeed: [
-      document.getElementById("previewSpeedTop"),
-      document.getElementById("previewSpeedBottom"),
-    ],
-    previewPhoto: [
-      document.getElementById("previewPhotoTop"),
-      document.getElementById("previewPhotoBottom"),
-    ],
+    cardPreview: document.getElementById("cardPreview"),
   };
 
   const CONFIG = {
@@ -53,14 +37,27 @@ window.addEventListener("DOMContentLoaded", () => {
       emptyList: "Пока нет карточек в листе.",
     },
     icons: {
-      ac: "icons/shield.svg",
-      speed: "icons/speed.svg",
+      ac: `
+        <svg viewBox="0 0 512 512" aria-hidden="true" focusable="false">
+          <path d="M202.182922,458.891754 C139.643829,421.766632 99.467316,368.142365 80.860298,298.339447 C75.441353,278.010651 72.752342,257.224396 72.712379,236.169357 C72.619720,187.347229 72.741943,138.524597 72.562012,89.702950 C72.544792,85.031189 73.967979,83.056190 78.465927,81.769997 C135.882355,65.351654 193.247803,48.754761 250.605942,32.133335 C254.064774,31.131018 257.279694,30.876293 260.816376,31.900331 C318.657593,48.648140 376.511963,65.351357 434.411285,81.896751 C438.812714,83.154510 440.033966,85.335152 440.021912,89.676849 C439.891479,136.665741 440.072968,183.655640 439.898102,230.644241 C439.659637,294.719788 420.202087,352.126404 378.955292,401.506226 C346.976868,439.790161 306.856750,466.288849 259.394867,481.691620 C256.952148,482.484375 254.872406,482.077911 252.622559,481.342010 C235.154419,475.628204 218.419662,468.272217 202.182922,458.891754 M315.604675,76.098251 C297.066040,70.751556 278.519379,65.432289 259.997681,60.027466 C257.335632,59.250648 254.874863,59.245289 252.188660,60.027908 C202.993744,74.360779 153.799255,88.696495 104.530891,102.773392 C100.181259,104.016159 99.247795,105.983055 99.259521,110.064667 C99.381065,152.392685 99.264153,194.721375 99.364037,237.049500 C99.412567,257.612061 102.157478,277.891296 108.066307,297.571259 C130.686478,372.910126 178.891266,424.757965 252.048859,453.533600 C255.232162,454.785706 258.025024,454.683594 261.170349,453.465942 C316.581360,432.013916 358.600800,395.338928 386.388031,342.766907 C403.539246,310.317719 412.678375,275.633606 412.843414,238.825027 C413.034698,196.164368 412.837677,153.501907 413.063049,110.841576 C413.090088,105.721794 411.404663,103.622498 406.550476,102.255135 C376.446533,93.775314 346.431793,84.978828 315.604675,76.098251 z"/>
+        </svg>
+      `,
+      speed: `
+        <svg viewBox="0 0 352 384" aria-hidden="true" focusable="false">
+          <path d="M72.000038,295.760803 C132.322495,295.755249 192.144974,295.722015 251.967392,295.759155 C272.377258,295.771820 289.049042,308.172180 293.460876,328.075378 C298.148285,349.221588 288.437195,371.291931 264.479828,377.869629 C242.760162,383.833008 219.888474,371.696411 213.348633,350.813660 C211.868500,346.087372 211.553467,341.353394 211.343231,336.552063 C211.140747,331.927582 213.672989,328.817841 217.410980,329.082062 C221.736023,329.387848 223.190384,332.241943 223.365417,336.266632 C224.051300,352.036865 231.979263,362.829376 245.144470,366.105042 C261.246887,370.111542 277.542267,361.107605 281.486420,346.024506 C285.867157,329.271851 276.572601,313.385529 259.848389,308.907806 C256.553040,308.025513 253.231689,308.242859 249.917252,308.241547 C181.429703,308.214447 112.942139,308.219208 44.454586,308.216003 C42.788330,308.215942 41.119461,308.252899 39.456348,308.175293 C35.645260,307.997467 32.897945,306.274231 32.799011,302.231750 C32.693848,297.934723 35.461086,295.881897 39.507099,295.818604 C47.836857,295.688263 56.169876,295.766174 64.501556,295.759583 C66.834381,295.757751 69.167206,295.760223 72.000038,295.760803 z"/>
+          <path d="M199.999969,111.256088 C176.505066,111.251968 153.510178,111.253662 130.515305,111.231079 C128.688843,111.229286 126.799095,111.325607 125.050194,110.908752 C121.995811,110.180748 120.049774,108.078461 120.031036,104.869797 C120.011703,101.558632 122.174095,99.676300 125.229187,99.073715 C127.163864,98.692116 129.208435,98.803329 131.203735,98.802780 C188.524323,98.787056 245.846664,98.536957 303.164337,98.943016 C318.917694,99.054626 332.036835,87.172943 334.118561,73.330391 C336.116119,60.047646 327.264252,44.798168 314.249908,41.354229 C292.940308,35.715145 274.770782,49.699745 275.210754,69.747963 C275.326691,75.030899 272.511505,78.234016 268.643707,78.065186 C265.150543,77.912712 262.879761,74.632370 262.758270,69.563141 C262.239990,47.935184 281.034180,28.557022 302.128601,27.502996 C327.905884,26.214985 346.662079,47.343628 346.425171,68.323662 C346.146606,92.991211 328.318909,111.185959 303.477264,111.235764 C269.151611,111.304588 234.825745,111.254738 199.999969,111.256088 z"/>
+          <path d="M182.446487,88.921051 C174.010986,89.082512 166.020142,89.231453 158.029236,89.235641 C116.226410,89.257553 74.423561,89.243584 32.620728,89.237892 C30.789125,89.237640 28.944920,89.324921 27.128582,89.146935 C23.488379,88.790230 21.185123,86.677452 21.029455,83.058701 C20.865643,79.250626 23.407389,77.304161 26.940807,76.925308 C29.743120,76.624840 32.596050,76.764107 35.426517,76.763405 C82.725342,76.751640 130.024216,76.783295 177.322968,76.723389 C192.378006,76.704323 202.530930,68.931786 206.717270,54.556850 C210.988403,39.890766 202.128082,23.905758 187.536865,19.227924 C168.217636,13.034323 149.526016,26.932289 148.354813,47.279099 C148.307007,48.109421 148.348907,48.944508 148.325760,49.776730 C148.220657,53.558231 146.126144,55.895081 142.520798,55.971573 C138.815765,56.050186 136.963043,53.588070 136.657074,49.871490 C135.024521,30.041473 148.370636,11.605866 167.939667,6.736266 C189.962753,1.255992 213.050034,14.316305 218.170975,35.151779 C224.307556,60.119591 212.043472,81.642235 188.244720,87.648735 C186.472687,88.095970 184.676224,88.446342 182.446487,88.921051 z"/>
+          <path d="M148.999969,286.231720 C109.866081,286.232239 71.232208,286.233185 32.598335,286.231537 C31.099802,286.231476 29.594110,286.295471 28.104136,286.175659 C24.289301,285.868835 21.801939,284.043274 21.723423,279.953857 C21.641226,275.672668 24.479841,274.251343 28.140720,273.823151 C29.127815,273.707703 30.136751,273.766388 31.135660,273.766357 C100.077133,273.763794 169.018600,273.763397 237.960068,273.762848 C238.126587,273.762848 238.293137,273.762726 238.459641,273.764496 C244.881653,273.832916 248.031219,275.896362 248.040192,280.040985 C248.049088,284.155701 244.877151,286.229004 238.424225,286.231171 C208.782806,286.241241 179.141388,286.233246 148.999969,286.231720 z"/>
+          <path d="M88.997391,98.791489 C93.985855,98.803627 98.477219,98.732262 102.963448,98.852570 C106.953102,98.959557 109.934387,100.809898 109.906700,105.059898 C109.879242,109.275352 106.966682,111.212440 102.928108,111.216835 C76.159241,111.246002 49.390240,111.253670 22.621489,111.185753 C18.657303,111.175697 15.857677,109.376839 15.741642,104.971489 C15.639174,101.081139 18.199707,98.841942 23.155052,98.826157 C44.935871,98.756744 66.717026,98.793251 88.997391,98.791489 z"/>
+        </svg>
+      `,
     },
     easterEggName: "Иваныч",
   };
 
   let cropper = null;
   let cards = [];
+  let currentPreviewPhotoDataUrl = "";
 
   init();
 
@@ -89,7 +86,8 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function handleImageChange(event) {
-    setPreviewPhoto("");
+    currentPreviewPhotoDataUrl = "";
+    updatePreview();
 
     const file = event.target.files?.[0];
     if (!file) return;
@@ -106,6 +104,8 @@ window.addEventListener("DOMContentLoaded", () => {
       cropper = new Cropper(DOM.imagePreview, {
         aspectRatio: CONFIG.cropAspectRatio,
         viewMode: 1,
+        ready: refreshPreviewPhotoFromCropper,
+        cropend: refreshPreviewPhotoFromCropper,
       });
     };
 
@@ -113,61 +113,30 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function updatePreview() {
+    const previewCard = getPreviewCardData();
+    DOM.cardPreview.innerHTML = buildCardMarkup(previewCard);
+    toggleEasterEgg(previewCard.name);
+  }
+
+  function refreshPreviewPhotoFromCropper() {
+    currentPreviewPhotoDataUrl = getCroppedPhotoDataUrl() || "";
+    updatePreview();
+  }
+
+  function getPreviewCardData() {
     const { name, ac, speed } = getFormData();
 
-    renderNamePreview(name);
-    renderStatPreview(DOM.previewAC, ac, CONFIG.icons.ac);
-    renderStatPreview(DOM.previewSpeed, speed, CONFIG.icons.speed);
-    toggleEasterEgg(name);
-  }
-
-  function renderNamePreview(name) {
-    const hasName = Boolean(name);
-
-    DOM.previewName.forEach((el) => {
-      el.textContent = hasName ? name : CONFIG.placeholders.name;
-      el.classList.toggle("empty", !hasName);
-    });
-  }
-
-  function renderStatPreview(elements, value, iconSrc) {
-    elements.forEach((el) => {
-      el.innerHTML = "";
-      el.classList.remove("stat-empty");
-
-      if (!value) {
-        el.classList.add("stat-empty");
-        return;
-      }
-
-      el.append(document.createTextNode(value));
-
-      const img = document.createElement("img");
-      img.src = iconSrc;
-      img.alt = "";
-      el.appendChild(img);
-    });
+    return {
+      name,
+      ac,
+      speed,
+      photoDataUrl: currentPreviewPhotoDataUrl,
+    };
   }
 
   function toggleEasterEgg(name) {
     DOM.easterEgg.style.display =
       name === CONFIG.easterEggName ? "block" : "none";
-  }
-
-  function setPreviewPhoto(dataUrl) {
-    DOM.previewPhoto.forEach((container) => {
-      container.innerHTML = "";
-
-      if (!dataUrl) {
-        container.textContent = CONFIG.placeholders.photo;
-        return;
-      }
-
-      const img = document.createElement("img");
-      img.src = dataUrl;
-      img.alt = "Фото персонажа";
-      container.appendChild(img);
-    });
   }
 
   function getCroppedPhotoDataUrl() {
@@ -183,13 +152,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   function handleAddCard() {
     const { name, ac, speed } = getFormData();
-    const photoDataUrl = getCroppedPhotoDataUrl();
-
-    if (photoDataUrl) {
-      setPreviewPhoto(photoDataUrl);
-    }
-
-    updatePreview();
+    const photoDataUrl = currentPreviewPhotoDataUrl || getCroppedPhotoDataUrl();
 
     cards.push({
       name,
@@ -198,6 +161,7 @@ window.addEventListener("DOMContentLoaded", () => {
       photoDataUrl,
     });
 
+    updatePreview();
     renderCardsList();
   }
 
@@ -316,19 +280,11 @@ window.addEventListener("DOMContentLoaded", () => {
   async function renderCardToDataUrl(card) {
     const temp = document.createElement("div");
 
+    temp.className = "card-preview card-preview-export";
     temp.style.position = "fixed";
     temp.style.left = "-10000px";
     temp.style.top = "0";
-    temp.style.width = "35mm";
-    temp.style.height = "120mm";
-    temp.style.padding = "0";
-    temp.style.background = "#ffffff";
-    temp.style.border = "1px solid #000000";
-    temp.style.borderRadius = "0";
-    temp.style.overflow = "hidden";
-    temp.style.boxSizing = "border-box";
-
-    temp.innerHTML = buildPdfCardMarkup(card);
+    temp.innerHTML = buildCardMarkup(card);
 
     document.body.appendChild(temp);
 
@@ -342,77 +298,59 @@ window.addEventListener("DOMContentLoaded", () => {
     return canvas.toDataURL("image/png");
   }
 
-  function buildPdfCardMarkup(card) {
-    const photoMarkup = card.photoDataUrl
-      ? `<img src="${card.photoDataUrl}" style="width:100%;height:100%;object-fit:cover;display:block;" />`
-      : CONFIG.placeholders.photo;
-
-    const nameJustify = card.name ? "center" : "flex-start";
-    const nameBorder = card.name ? "none" : "1px solid #000000";
-    const acColor = card.ac ? "#000000" : "#9ca3af";
-    const speedColor = card.speed ? "#000000" : "#9ca3af";
-
-    const halfMarkup = `
-      <div style="width:100%;height:39.6mm;border-radius:0;border:1px solid #000000;overflow:hidden;background:#ffffff;display:flex;align-items:stretch;justify-content:center;">
-        ${photoMarkup}
+  function buildCardMarkup(card) {
+    return `
+      <div class="card-cut-line"></div>
+      <div class="card-half top">
+        ${buildCardHalfMarkup(card)}
       </div>
-      <div class="name-container" style="width:100%;min-height:20px;display:flex;flex-direction:column;justify-content:flex-end;color:#111827;">
-        <div style="width:100%;min-height:14px;display:flex;align-items:center;justify-content:${nameJustify};border-bottom:${nameBorder};">
-          ${card.name || ""}
-        </div>
-        <div class="stats-row" style="margin-top:4px;">
-          <div class="stat circle" style="color:${acColor};">${card.ac || ""}</div>
-          <div class="stat square" style="color:${speedColor};">${card.speed || ""}</div>
-        </div>
+      <div class="card-half bottom">
+        ${buildCardHalfMarkup(card)}
       </div>
     `;
+  }
+
+  function buildCardHalfMarkup(card) {
+    const safeName = escapeHtml(card.name);
+    const safePhotoUrl = escapeHtml(card.photoDataUrl || "");
+    const photoMarkup = safePhotoUrl
+      ? `<img src="${safePhotoUrl}" alt="Фото персонажа" />`
+      : `<span class="card-photo-placeholder">${CONFIG.placeholders.photo}</span>`;
 
     return `
-      <div style="position:relative;width:100%;height:100%;font-family:system-ui, sans-serif;color:#000000;font-size:14px;background:#ffffff;">
-        <style>
-          :root{
-            --stat-size: 7mm;
-            --stats-gap: 40px;
-            --name-padding-top: 2px;
-            --name-padding-right: 6px;
-            --name-padding-bottom: 1px;
-            --name-padding-left: 6px;
-          }
-          .card-photo { width:100%; height:39.6mm; }
-          .name-container {
-            padding: var(--name-padding-top) var(--name-padding-right) var(--name-padding-bottom) var(--name-padding-left);
-            box-sizing: border-box;
-          }
-          .stats-row {
-            display:flex;
-            gap: var(--stats-gap);
-            justify-content:center;
-          }
-          .stat {
-            width:var(--stat-size);
-            height:var(--stat-size);
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            line-height:var(--stat-size);
-            font-size:calc(var(--stat-size) * 0.55);
-            border:1px solid #000;
-            background:#fff;
-          }
-          .stat.circle { border-radius:50%; }
-          .stat.square { border-radius:0; }
-        </style>
-
-        <div style="position:absolute;left:0;top:60mm;width:100%;height:0;border-top:1px dashed rgba(0,0,0,0.3);"></div>
-
-        <div style="position:absolute;left:0;top:0;width:100%;height:60mm;padding:0;box-sizing:border-box;display:flex;flex-direction:column;align-items:stretch;gap:10px;transform:rotate(180deg);transform-origin:center;">
-          ${halfMarkup}
-        </div>
-
-        <div style="position:absolute;left:0;bottom:0;width:100%;height:60mm;padding:0;box-sizing:border-box;display:flex;flex-direction:column;align-items:stretch;gap:10px;">
-          ${halfMarkup}
-        </div>
+      <div class="card-photo">
+        ${photoMarkup}
+      </div>
+      <div class="card-name${card.name ? "" : " empty"}">
+        ${safeName || CONFIG.placeholders.name}
+      </div>
+      <div class="card-stats">
+        ${buildStatMarkup("shield", card.ac, CONFIG.icons.ac)}
+        ${buildStatMarkup("speed", card.speed, CONFIG.icons.speed)}
       </div>
     `;
+  }
+
+  function buildStatMarkup(className, value, iconSrc) {
+    const hasValue = Boolean(value);
+
+    return `
+      <div class="${className}${hasValue ? "" : " stat-empty"}">
+        ${
+          hasValue
+            ? `<span>${escapeHtml(value)}</span>${iconSrc}`
+            : ""
+        }
+      </div>
+    `;
+  }
+
+  function escapeHtml(value = "") {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
   }
 });
