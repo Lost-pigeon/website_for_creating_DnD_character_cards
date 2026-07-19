@@ -15,11 +15,13 @@ window.I18N = {
   // ────────────────────────────────────────
   ru: {
     // Мета-теги страницы
-    pageTitle:       "D&D трекер инициативы — генератор карточек для печати",
+    pageTitle:       "D&D трекер инициативы - генератор карточек для печати",
     metaDescription: "Бесплатный онлайн-генератор карточек инициативы D&D: загрузите портрет, укажите имя, КД и скорость, выберите размер карточки и скачайте PDF для печати.",
 
     // Шапка и заголовок
     heroTitle:       "D&D трекер инициативы",
+    brandSub:        "Инструменты мастера · D&D",
+    brandAppTitle:   "Трекер инициативы",
     generatorTitle:  "Генератор печатных карточек",
     heroSubtitle:    "Загрузите портрет, введите имя, КД и скорость — получите двусторонние карточки для физического трекера инициативы в виде PDF для печати и сгиба.",
     noscript:        "Для работы генератора нужен JavaScript. Включите его в браузере, чтобы создать и скачать карточки.",
@@ -60,7 +62,12 @@ window.I18N = {
     hintEmptyFields:  "Пустое имя оставит линию для ручного вписывания. Незаполненные КД и скорость сохранят иконки пустыми.",
 
     // Список карточек
-    sectionList: "Карточки в листе",
+    sectionList:   "В листе",
+    btnClearSheet: "Очистить лист",
+
+    // Кнопка переключения темы
+    themeToDark:  "Тёмная тема",
+    themeToLight: "Светлая тема",
 
     // Превью и печать
     sectionPreview: "Превью карточки",
@@ -80,11 +87,11 @@ window.I18N = {
 
       // Заглушки в пустых полях карточки
       emptyList:        "Пока нет карточек в листе.",
-      photoPlaceholder: "Фото персонажа",
       nameEmpty:        "__________________", // линия для ручной подписи
 
       // Предупреждения
-      noCards: "Добавьте хотя бы одну карточку в лист.",
+      noCards:           "Добавьте хотя бы одну карточку в лист.",
+      confirmClearSheet: "Удалить все карточки из листа?",
 
       // Лейблы в списке карточек
       unnamed:      "Без имени",
@@ -108,11 +115,13 @@ window.I18N = {
   // ────────────────────────────────────────
   en: {
     // Meta tags
-    pageTitle:       "D&D Initiative Tracker — printable card generator",
+    pageTitle:       "D&D Initiative Tracker - printable card generator",
     metaDescription: "Free online D&D initiative card generator: upload a portrait, enter name, AC and speed, choose card size and download a print-ready PDF.",
 
     // Header and title
     heroTitle:       "D&D Initiative Tracker",
+    brandSub:        "DM tools · D&D",
+    brandAppTitle:   "Initiative Tracker",
     generatorTitle:  "Printable Card Generator",
     heroSubtitle:    "Upload a portrait, enter name, AC and speed — get double-sided initiative cards as a print-and-fold PDF.",
     noscript:        "JavaScript is required to use the generator. Please enable it in your browser.",
@@ -153,7 +162,12 @@ window.I18N = {
     hintEmptyFields:  "Empty name leaves a line for handwriting. Empty AC and speed keep the icons without values.",
 
     // Card list
-    sectionList: "Cards in sheet",
+    sectionList:   "Cards in sheet",
+    btnClearSheet: "Clear sheet",
+
+    // Theme toggle
+    themeToDark:  "Dark theme",
+    themeToLight: "Light theme",
 
     // Preview and print
     sectionPreview: "Card preview",
@@ -171,10 +185,10 @@ window.I18N = {
         `Card height: ${h} mm, with holder (${gap} mm): ${total} mm.`,
 
       emptyList:        "No cards in sheet yet.",
-      photoPlaceholder: "Character photo",
       nameEmpty:        "____________________",
 
-      noCards: "Add at least one card to the sheet.",
+      noCards:           "Add at least one card to the sheet.",
+      confirmClearSheet: "Remove all cards from the sheet?",
 
       unnamed:      "Unnamed",
       emptyFields:  "empty fields",

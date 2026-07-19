@@ -120,6 +120,7 @@ window.addEventListener("DOMContentLoaded", () => {
   // ══════════════════════════════════════════════════════════════════
 
   const LANG_STORAGE_KEY = "dnd_lang"; // ключ в localStorage для запоминания выбора
+  const THEME_STORAGE_KEY = "dnd_theme"; // ключ для запоминания темы (light / dark)
 
   /**
    * Определяет язык интерфейса при первой загрузке страницы:
@@ -183,7 +184,10 @@ window.addEventListener("DOMContentLoaded", () => {
     if (DOM.langToggle) {
       DOM.langToggle.title = t("langToggleTitle");
       DOM.langToggle.setAttribute("aria-label", t("langToggleTitle"));
+      DOM.langToggle.setAttribute("data-active", currentLang); // подсветка активного сегмента RU/EN
     }
+
+    updateThemeToggleLabel(); // подпись кнопки темы зависит от языка
 
     // Динамические блоки строятся через innerHTML, поэтому их нужно
     // перерисовать целиком после смены языка
@@ -198,6 +202,48 @@ window.addEventListener("DOMContentLoaded", () => {
     currentLang = currentLang === "ru" ? "en" : "ru";
     localStorage.setItem(LANG_STORAGE_KEY, currentLang);
     applyTranslations();
+  }
+
+  // ══════════════════════════════════════════════════════════════════
+  //  2b. ТЕМА ОФОРМЛЕНИЯ (светлая / тёмная)
+  // ══════════════════════════════════════════════════════════════════
+  //
+  //  Тема хранится в атрибуте data-theme на <html>. Первичное значение
+  //  выставляет встроенный скрипт в <head> (чтобы не мигала светлая тема
+  //  до загрузки этого файла), поэтому здесь мы просто читаем текущее
+  //  значение и умеем его переключать.
+  // ══════════════════════════════════════════════════════════════════
+
+  const THEME_COLORS = { light: "#f2f2ef", dark: "#131416" };
+
+  /** Возвращает текущую тему, опираясь на уже выставленный атрибут data-theme. */
+  function getCurrentTheme() {
+    return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+  }
+
+  /** Применяет тему: атрибут на <html>, meta theme-color, подпись кнопки. */
+  function applyTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    document.querySelector('meta[name="theme-color"]')
+      ?.setAttribute("content", THEME_COLORS[theme] ?? THEME_COLORS.light);
+    updateThemeToggleLabel();
+  }
+
+  /** Обновляет title/aria-label кнопки темы (показываем, куда переключит клик). */
+  function updateThemeToggleLabel() {
+    if (!DOM.themeToggle) return;
+    // Если сейчас тёмная — клик уведёт в светлую, и наоборот.
+    const nextLabel = getCurrentTheme() === "dark" ? t("themeToLight") : t("themeToDark");
+    DOM.themeToggle.title = nextLabel;
+    DOM.themeToggle.setAttribute("aria-label", nextLabel);
+    DOM.themeToggle.setAttribute("aria-pressed", String(getCurrentTheme() === "dark"));
+  }
+
+  /** Переключает тему и запоминает выбор в localStorage. */
+  function toggleTheme() {
+    const next = getCurrentTheme() === "dark" ? "light" : "dark";
+    try { localStorage.setItem(THEME_STORAGE_KEY, next); } catch (e) { /* приватный режим — молча игнорируем */ }
+    applyTheme(next);
   }
 
   // ══════════════════════════════════════════════════════════════════
@@ -224,6 +270,8 @@ window.addEventListener("DOMContentLoaded", () => {
     cancelEditBtn: document.getElementById("cancelEditBtn"),
     downloadPdfBtn: document.getElementById("downloadPdfBtn"),
     langToggle: document.getElementById("langToggle"),
+    themeToggle: document.getElementById("themeToggle"),
+    clearSheetBtn: document.getElementById("clearSheetBtn"),
 
     // Динамически обновляемые блоки
     cardPreview: document.getElementById("cardPreview"),
@@ -336,6 +384,18 @@ window.addEventListener("DOMContentLoaded", () => {
     DOM.cancelEditBtn.addEventListener("click", cancelEdit);
     DOM.downloadPdfBtn.addEventListener("click", handleDownloadPdf);
     DOM.langToggle.addEventListener("click", toggleLang);
+    if (DOM.themeToggle) DOM.themeToggle.addEventListener("click", toggleTheme);
+    if (DOM.clearSheetBtn) DOM.clearSheetBtn.addEventListener("click", handleClearSheet);
+  }
+
+  /** Полностью очищает лист карточек (с подтверждением) и выходит из режима редактирования. */
+  function handleClearSheet() {
+    if (!cards.length) return;
+    if (!window.confirm(tjs("confirmClearSheet"))) return;
+    cards = [];
+    editingIndex = null;
+    syncEditModeUI();
+    renderCardsList();
   }
 
   // ══════════════════════════════════════════════════════════════════
@@ -408,7 +468,7 @@ window.addEventListener("DOMContentLoaded", () => {
         cropend: refreshPreviewPhotoFromCropper,
       });
     } else {
-      DOM.imagePreview.src = "";
+      DOM.imagePreview.removeAttribute("src");
     }
 
     DOM.editBannerName.textContent = card.name || tjs("unnamed");
@@ -704,6 +764,7 @@ window.addEventListener("DOMContentLoaded", () => {
       exitEditMode();
     } else {
       cards.push(cardData);
+      handleClearForm();
     }
 
     updatePreview();
@@ -735,6 +796,7 @@ window.addEventListener("DOMContentLoaded", () => {
     DOM.cardsList.innerHTML = "";
 
     if (DOM.cardsCountBadge) DOM.cardsCountBadge.textContent = String(cards.length);
+    if (DOM.clearSheetBtn) DOM.clearSheetBtn.disabled = !cards.length;
 
     if (!cards.length) {
       const empty = document.createElement("span");
@@ -865,7 +927,7 @@ window.addEventListener("DOMContentLoaded", () => {
       cropper.destroy();
       cropper = null;
     }
-    DOM.imagePreview.src = "";
+    DOM.imagePreview.removeAttribute("src");
 
     updatePreview();
   }
@@ -1088,7 +1150,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const photoMarkup = safePhotoUrl
       ? `<img src="${safePhotoUrl}" alt="" />`
-      : `<span class="card-photo-placeholder">${tjs("photoPlaceholder")}</span>`;
+      : "";
 
     return `
       <div class="card-half-content">
